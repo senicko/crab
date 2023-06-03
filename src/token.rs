@@ -11,6 +11,14 @@ pub enum TokenType {
     // Operators
     Assign,
     Plus,
+    Minus,
+    Bang,
+    Asterisk,
+    Slash,
+    LesserThan,
+    GreaterThan,
+    Eq,
+    NotEq,
 
     // Delimiters
     Comma,
@@ -23,6 +31,11 @@ pub enum TokenType {
     // Keyowrds
     Fn,
     Let,
+    True,
+    False,
+    If,
+    Else,
+    Return,
 }
 
 impl TokenType {
@@ -30,6 +43,11 @@ impl TokenType {
         match ident {
             "fn" => TokenType::Fn,
             "let" => TokenType::Let,
+            "true" => TokenType::True,
+            "false" => TokenType::False,
+            "if" => TokenType::If,
+            "else" => TokenType::Else,
+            "return" => TokenType::Return,
             _ => TokenType::Ident,
         }
     }

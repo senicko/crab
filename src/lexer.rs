@@ -35,12 +35,42 @@ impl Lexer {
         self.skip_whitespace();
 
         let token = match self.ch {
-            '=' => Token::from_char(TokenType::Assign, self.ch),
+            '=' => {
+                if self.peek_char() == '=' {
+                    let prev_ch = self.ch;
+                    self.read_char();
+
+                    Token {
+                        token_type: TokenType::Eq,
+                        literal: Some(format!("{}{}", prev_ch, self.ch)),
+                    }
+                } else {
+                    Token::from_char(TokenType::Assign, self.ch)
+                }
+            }
+            '+' => Token::from_char(TokenType::Plus, self.ch),
+            '-' => Token::from_char(TokenType::Minus, self.ch),
+            '!' => {
+                if self.peek_char() == '=' {
+                    let prev_ch = self.ch;
+                    self.read_char();
+
+                    Token {
+                        token_type: TokenType::NotEq,
+                        literal: Some(format!("{}{}", prev_ch, self.ch)),
+                    }
+                } else {
+                    Token::from_char(TokenType::Bang, self.ch)
+                }
+            }
+            '/' => Token::from_char(TokenType::Slash, self.ch),
+            '*' => Token::from_char(TokenType::Asterisk, self.ch),
+            '<' => Token::from_char(TokenType::LesserThan, self.ch),
+            '>' => Token::from_char(TokenType::GreaterThan, self.ch),
             ';' => Token::from_char(TokenType::Semicolon, self.ch),
+            ',' => Token::from_char(TokenType::Comma, self.ch),
             '(' => Token::from_char(TokenType::LParen, self.ch),
             ')' => Token::from_char(TokenType::RParen, self.ch),
-            ',' => Token::from_char(TokenType::Comma, self.ch),
-            '+' => Token::from_char(TokenType::Plus, self.ch),
             '{' => Token::from_char(TokenType::LBrace, self.ch),
             '}' => Token::from_char(TokenType::RBrace, self.ch),
             _ => {
@@ -114,6 +144,10 @@ impl Lexer {
         self.read_position += 1;
     }
 
+    fn peek_char(&self) -> char {
+        self.input.as_bytes()[self.read_position] as char
+    }
+
     fn is_letter(c: char) -> bool {
         c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c == '_'
     }
@@ -138,10 +172,23 @@ let add = fn(x, y) {
     x + y;
 };
 let result = add(five, ten);
+
+!-/*5;
+5 < 10 > 5;
+
+if (5 < 10) {
+    return true;
+} else {
+    return false;
+}
+
+10 == 10;
+10 != 9;
 ",
         );
 
         let tests: Vec<Token> = vec![
+            // variables
             Token::from_str(TokenType::Let, "let"),
             Token::from_str(TokenType::Ident, "five"),
             Token::from_str(TokenType::Assign, "="),
@@ -177,6 +224,43 @@ let result = add(five, ten);
             Token::from_str(TokenType::Comma, ","),
             Token::from_str(TokenType::Ident, "ten"),
             Token::from_str(TokenType::RParen, ")"),
+            Token::from_str(TokenType::Semicolon, ";"),
+            Token::from_str(TokenType::Bang, "!"),
+            Token::from_str(TokenType::Minus, "-"),
+            Token::from_str(TokenType::Slash, "/"),
+            Token::from_str(TokenType::Asterisk, "*"),
+            Token::from_str(TokenType::Int, "5"),
+            Token::from_str(TokenType::Semicolon, ";"),
+            Token::from_str(TokenType::Int, "5"),
+            Token::from_str(TokenType::LesserThan, "<"),
+            Token::from_str(TokenType::Int, "10"),
+            Token::from_str(TokenType::GreaterThan, ">"),
+            Token::from_str(TokenType::Int, "5"),
+            Token::from_str(TokenType::Semicolon, ";"),
+            Token::from_str(TokenType::If, "if"),
+            Token::from_str(TokenType::LParen, "("),
+            Token::from_str(TokenType::Int, "5"),
+            Token::from_str(TokenType::LesserThan, "<"),
+            Token::from_str(TokenType::Int, "10"),
+            Token::from_str(TokenType::RParen, ")"),
+            Token::from_str(TokenType::LBrace, "{"),
+            Token::from_str(TokenType::Return, "return"),
+            Token::from_str(TokenType::True, "true"),
+            Token::from_str(TokenType::Semicolon, ";"),
+            Token::from_str(TokenType::RBrace, "}"),
+            Token::from_str(TokenType::Else, "else"),
+            Token::from_str(TokenType::LBrace, "{"),
+            Token::from_str(TokenType::Return, "return"),
+            Token::from_str(TokenType::False, "false"),
+            Token::from_str(TokenType::Semicolon, ";"),
+            Token::from_str(TokenType::RBrace, "}"),
+            Token::from_str(TokenType::Int, "10"),
+            Token::from_str(TokenType::Eq, "=="),
+            Token::from_str(TokenType::Int, "10"),
+            Token::from_str(TokenType::Semicolon, ";"),
+            Token::from_str(TokenType::Int, "10"),
+            Token::from_str(TokenType::NotEq, "!="),
+            Token::from_str(TokenType::Int, "9"),
             Token::from_str(TokenType::Semicolon, ";"),
             Token {
                 token_type: TokenType::Eof,
