@@ -1,3 +1,5 @@
+use crab;
+
 fn main() {
-    println!("Hello! This is the Crab programming language!");
+    crab::start_prompt();
 }
